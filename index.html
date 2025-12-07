@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash Street - Core Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">CRASH<span>STREET</span></div>
+        <div class="user-info">
+            <button class="redeem-btn" onclick="showRedeemModal()">REDEEM</button>
+            <div class="user-stats" id="userStats" style="display:none;">
+                <div class="referral-code"><span class="label">Referral</span><span class="value"
+                        id="referralCode">-</span></div>
+                <div class="balance"><span class="label">Crash Cash</span><span class="value"
+                        id="crashCashBalance">0</span></div>
+                <div class="username"><span class="label">Player</span><span class="value" id="username">-</span></div>
+            </div>
+            <button class="login-btn" id="loginBtn" onclick="showLoginModal()">LOGIN</button>
+            <button class="logout-btn" id="logoutBtn" style="display:none;" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page active" id="mainPage">
+            <div class="hero-section">
+                <h1 class="hero-title">SELECT <span style="color:var(--accent-green);">VOLATILITY</span></h1>
+                <p style="color:var(--text-secondary);">Choose your risk level and start trading</p>
+            </div>
+            <div class="ticker-grid">
+                <!-- Modes can be dynamic, but hardcoded for prototype simplicity -->
+                <div class="ticker-card" onclick="startGame(0)">
+                    <div class="ticker-badge safe">SAFE</div>
+                    <div class="ticker-symbol">$CORLA</div>
+                    <div class="ticker-name">Corca-Cola</div>
+                    <div class="ticker-range"><span class="positive">+1.5x</span> to <span class="negative">-1.5x</span>
+                    </div>
+                </div>
+                <div class="ticker-card" onclick="startGame(1)">
+                    <div class="ticker-badge moderate">MODERATE</div>
+                    <div class="ticker-symbol">$BRKR</div>
+                    <div class="ticker-name">Brokerly</div>
+                    <div class="ticker-range"><span class="positive">+3x</span> to <span class="negative">-3x</span>
+                    </div>
+                </div>
+                <div class="ticker-card" onclick="startGame(2)">
+                    <div class="ticker-badge balanced">BALANCED</div>
+                    <div class="ticker-symbol">$NFTX</div>
+                    <div class="ticker-name">NiftyFox</div>
+                    <div class="ticker-range"><span class="positive">+5x</span> to <span class="negative">-5x</span>
+                    </div>
+                </div>
+                <div class="ticker-card" onclick="startGame(3)">
+                    <div class="ticker-badge risky">RISKY</div>
+                    <div class="ticker-symbol">$ETHRX</div>
+                    <div class="ticker-name">Etherex</div>
+                    <div class="ticker-range"><span class="positive">+8x</span> to <span class="negative">-8x</span>
+                    </div>
+                </div>
+                <div class="ticker-card" onclick="startGame(4)">
+                    <div class="ticker-badge extreme">EXTREME</div>
+                    <div class="ticker-symbol">$TSLR</div>
+                    <div class="ticker-name">Tesler</div>
+                    <div class="ticker-range"><span class="positive">+12x</span> to <span class="negative">-12x</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Total Profit</div>
+                    <div class="stat-value" id="totalProfit">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="gamePage">
+            <div class="round-info">
+                <div class="round-stat">
+                    <div class="round-stat-label">Status</div>
+                    <div class="round-stat-value" id="course-text">Live</div>
+                </div>
+                <!-- Timer removed as logic is now server pushed mostly, but we keep round stats -->
+                <div class="round-stat">
+                    <div class="round-stat-label">Session P/L</div>
+                    <div class="round-stat-value" id="sessionPL">-</div>
+                </div>
+                <button class="exit-game-btn" onclick="showPage('mainPage')">EXIT</button>
+            </div>
+            <div class="game-container">
+                <div class="chart-section">
+                    <div class="chart-container">
+                        <canvas id="chartCanvas"></canvas>
+                        <div class="multiplier-display" id="multiplierDisplay">1.00x</div>
+                        <div class="market-halt-overlay" id="marketHaltOverlay">
+                            <div class="market-halt-text">MARKET HALT</div>
+                        </div>
+                    </div>
+                    <div class="betting-controls">
+                        <div class="bet-input-group">
+                            <label class="bet-input-label">Trade Amount</label>
+                            <input type="number" class="bet-input" id="betAmount" min="10" max="250000" value="100">
+                            <div class="quick-bet-buttons">
+                                <button class="quick-bet" onclick="setBetAmount(50)">50</button>
+                                <button class="quick-bet" onclick="setBetAmount(100)">100</button>
+                                <button class="quick-bet" onclick="setBetAmount(500)">500</button>
+                                <button class="quick-bet" onclick="setBetAmount(1000)">1K</button>
+                            </div>
+                        </div>
+                        <button class="place-bet-btn" id="placeBetBtn" onclick="placeBet()">PLACE TRADE</button>
+                        <button class="cash-out-btn" id="cashOutBtn" onclick="cashOut()">CASH OUT</button>
+                    </div>
+                </div>
+                <div class="history-panel">
+                    <h4 style="margin-bottom:15px;font-weight:300;">Trade History</h4>
+                    <div id="gameHistory"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn active" onclick="showPage('mainPage')">HOME</button>
+        <button class="nav-btn" onclick="showEnterCodeModal()">ENTER CODE</button>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-title">Access Market</div>
+            <div class="modal-body">
+                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input"
+                        id="emailInput" placeholder="trader@crashstreet.com"></div>
+                <div class="form-group"><label class="form-label">Username</label><input type="text" class="form-input"
+                        id="usernameInput" placeholder="TraderName"></div>
+            </div>
+            <div class="modal-footer"><button class="modal-btn secondary"
+                    onclick="closeModal('loginModal')">CANCEL</button><button class="modal-btn primary"
+                    onclick="register()">ENTER</button></div>
+        </div>
+    </div>
+
+    <div class="modal" id="enterCodeModal">
+        <div class="modal-content">
+            <div class="modal-title">Enter Referral Code</div>
+            <div class="modal-body">
+                <div class="form-group"><label class="form-label">Referral Code</label><input type="text"
+                        class="form-input" id="referralInput" placeholder="XXXX-XXXX"></div>
+                <div class="form-group"><label class="form-label">Bonus</label>
+                    <p style="color:var(--text-secondary);">Receive 400 CC bonus</p>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="modal-btn secondary"
+                    onclick="closeModal('enterCodeModal')">CANCEL</button><button class="modal-btn primary"
+                    onclick="/* TODO: Implement code logic in Server */ alert('Feature pending implementation')">SUBMIT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="redeemModal">
+        <div class="modal-content">
+            <div class="modal-title">Redeem Crash Cash</div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);margin-bottom:15px;">Minimum: 50,000 CC = $50 USD</p>
+                <div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input"
+                        id="redeemAmount" min="50000" step="1000" placeholder="50000"></div>
+                <p style="color:var(--accent-green);font-size:1.1rem;margin-top:15px;">USD Value: $<span
+                        id="redeemValue">0</span></p>
+            </div>
+            <div class="modal-footer"><button class="modal-btn secondary"
+                    onclick="closeModal('redeemModal')">CANCEL</button><button class="modal-btn primary"
+                    onclick="redeemCash()">REDEEM</button></div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
